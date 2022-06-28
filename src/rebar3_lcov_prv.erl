@@ -1,5 +1,8 @@
 -module(rebar3_lcov_prv).
 
+-ignore_xref([do/1]).
+-ignore_xref([format_error/1]).
+
 -export([init/1]).
 -export([do/1]).
 -export([format_error/1]).
