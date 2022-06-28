@@ -1,0 +1,11 @@
+{application, rebar3_lcov, [
+    {description, "Rebar3 plugin for converting erlang .coverdata to lcov tracefile format"},
+    {vsn, "0.1"},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {env, []},
+    {licenses, ["Apache 2.0"]},
+    {links, []}
+]}.

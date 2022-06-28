@@ -1,0 +1,13 @@
+# Build artifacts
+/_build/
+*.o
+*.beam
+*.plt
+
+# Run artifacts
+erl_crash.dump
+log
+
+# make stuff
+/.image.*
+Makefile.env
