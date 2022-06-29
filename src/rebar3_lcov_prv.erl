@@ -64,7 +64,7 @@ ensure_output_path(OutputFilePath) ->
 import_app_coverage([]) ->
     ok;
 import_app_coverage([File | Rest]) ->
-    rebar_api:info("Importing file ~s", [File]),
+    _ = rebar_api:info("Importing file ~s", [File]),
     case cover:import(File) of
         ok -> import_app_coverage(Rest);
         Error -> Error
@@ -72,7 +72,7 @@ import_app_coverage([File | Rest]) ->
 
 analyze_app_coverage(Apps, State) ->
     Modules = cover:imported_modules(),
-    rebar_api:info("Analyzing coverage of ~p", [Modules]),
+    _ = rebar_api:debug("Analyzing coverage of ~p", [Modules]),
     {result, Result, _} = cover:analyse(Modules, calls, line),
     convert_app_coverage(get_ebin_paths(Apps, State), Result).
 
@@ -128,7 +128,7 @@ add_cover_line({{Module, LineNumber}, CallAmount}, Acc) ->
     Acc#{Module => array:set(LineNumber, CallAmount, CallsPerLine)}.
 
 map_source_paths(EbinPaths, CoverageByModule) ->
-    _ = rebar_api:info("Mapping source paths...", []),
+    _ = rebar_api:debug("Mapping source paths...", []),
     maps:fold(
         fun(ModuleName, CoverageData, AccIn) ->
             SourcePath = get_source_path(EbinPaths, ModuleName),
@@ -154,7 +154,7 @@ get_source_path([Dir | Rest], ModuleName) ->
             case proplists:get_value(source, CompileInfo) of
                 undefined ->
                     _ = rebar_api:error(
-                        "Could not find source path in beam file ~p for module: ~p",
+                        "Could not find source path in beam file ~s for module: ~p",
                         [Beam, ModuleName]
                     ),
                     throw({source_path_not_found, {in_ebin, Beam, ModuleName}});
@@ -177,31 +177,19 @@ lcov_opts(_State) ->
     [].
 
 input_files(State) ->
-    ProfileDir = rebar_dir:base_dir(State),
     CoverDataFiles = coverdata_files(State),
-    FullPaths = [filename:join([ProfileDir, "cover", File]) || File <- CoverDataFiles],
-    filter_existing_inputs(FullPaths).
-
-filter_existing_inputs([]) ->
-    [];
-filter_existing_inputs([H | T]) ->
-    case file_exists(H) of
-        true ->
-            [H | filter_existing_inputs(T)];
-        false ->
-            rebar_api:info("Skipping non-existing file ~s", [H]),
-            filter_existing_inputs(T)
-    end.
-
-file_exists(Filename) ->
-    case file:read_file_info(Filename) of
-        {ok, _} ->
-            true;
-        {error, enoent} ->
-            false;
-        Reason ->
-            exit(Reason)
-    end.
+    CoverDir = filename:join([rebar_dir:base_dir(State), "cover"]),
+    ok = filelib:ensure_dir(filename:join([CoverDir, "dummy.log"])),
+    {ok, Files} = rebar_utils:list_dir(CoverDir),
+    rebar_utils:filtermap(
+        fun(FileName) ->
+            case lists:member(FileName, CoverDataFiles) of
+                true -> {true, filename:join([CoverDir, FileName])};
+                false -> false
+            end
+        end,
+        Files
+    ).
 
 output_file(State) ->
     Config = config_opts(State),

@@ -30,7 +30,7 @@ Add to your `project_plugins` as follows:
 ```erlang
 {project_plugins, [
     <...>
-    {rebar3_lcov, {git, "https://github.com/valitydev/rebar3-lcov.git", {tag, "v1"}}},
+    {rebar3_lcov, {git, "https://github.com/valitydev/rebar3-lcov.git", {tag, "0.1"}}},
     <...>
 }
 ```
