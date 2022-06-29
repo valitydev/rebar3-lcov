@@ -16,7 +16,7 @@ init(State) ->
         {module, ?MODULE},
         {namespace, lcov},
         {name, convert},
-        {deps, [{default, app_discovery}]},
+        {deps, [{default, app_discovery}, {default, compile}]},
         {example, "rebar3 lcov convert"},
         {short_desc, "Converts erlang .coverdata to lcov tracefile format"},
         {desc,
